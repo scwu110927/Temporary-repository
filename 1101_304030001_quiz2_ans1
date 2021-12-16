@@ -1,0 +1,12 @@
+nvec <- c(10, 50, 100, 500)
+xbar <- matrix(0, 100, 4)
+plot(c(0, 5), c(3, 7), type = "n", xlab = "", ylab = "", axes = F)
+lines(c(0, 5), c(5, 5), col = 8)
+axis(1, at = 1:4, labels = paste("n=", c(10, 50, 100, 500), sep = ""))
+axis(2, at = 3:7, labels = 3:7)
+for (i in 1:100){
+  for (j in 1:4){
+    rvec <- runif(nvec[j], 3, 7)
+    points(j, mean(rvec))
+  }
+}
