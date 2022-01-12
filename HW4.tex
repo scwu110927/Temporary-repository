@@ -40,42 +40,35 @@ Since $\chi^2 = 36.629$ and p-value $<.001$, reject $H0$. That's acceptable, bec
 \item Does $W|X=x$ have anything to do with $Y$?\\
 According to the question, the probability of $W|X=x$ is given and it doesn't contain any information about $Y$. Moreover, the information about Y can be completely determined by $X$. Hence, $W|X=x$ is independent to $Y$.
 
-\item Find $(\theta_{1|1}, \theta_{1|0})$.
-\[\theta_{1|1}=P(W=1|X=1)=0.9\]
-\[\theta_{1|0}=P(W=1|X=0)=0.75\]
-\item Find $\frac{n_{11}}{n_{.1}}$ and compare with $\alpha_1\theta_{1|1}+(1-\alpha_1)\theta_{1|0}$.
-\[\begin{array}{rcl}
-\alpha_1=P(X=1|Y=1)&=&\frac{P(X=1,Y=1)}{P(X=1,Y=1)+P(X=0,Y=1)}\\
-&=& \frac{P(Y=1|X=1)P(X=1)}{P(Y=1|X=1)P(X=1)+P(Y=1|X=0)P(X=0)}\\
-&=& \frac{0.3\times 0.5}{0.3\times 0.5+0.6\times 0.5} = 0.333\\
-\end{array}\]
-\[\alpha_1\theta_{1|1}+(1-\alpha_1)\theta_{1|0}=0.333\times 0.9+(1-0.333)\times 0.75= 0.8\]
-$\frac{n_{11}}{n_{.1}}$ is calculate by simulation as follow
+\item Find $(\theta_{1|1}, \theta_{1|0})$.\\
+Use simulation data $(W, X, Y)$ to be true data, the true values of $(\theta_{1|1}, \theta_{1|0})$ can be calculated as follow.
 \begin{lstlisting}
 > W <- rbinom(500, 1, 0.9*X+0.75*(1-X))
-> (WY.tab <- table(W, Y))
-   Y
-W     0   1
-  0  42  38
-  1 234 186
-> WY.tab[2, 2]/sum(WY.tab[, 2])
-[1] 0.8303571
+> (WXY.tab <- table(W, X, Y))
+W, X, Y = 0
+      0   1
+  0  25  17
+  1  75 159
+
+W, X, Y = 1
+      0   1
+  0  29   9
+  1 114  72
 \end{lstlisting}
-Use simulation data $(W, Y)$, the na\"ive estimate
-\[\frac{n_{11}}{n_{.1}}=186/(186+38)= 0.830\]  
-The values of $\frac{n_{11}}{n_{.1}}$ and $\alpha_1\theta_{1|1}+(1-\alpha_1)\theta_{1|0}$ are $0.830$ and $0.800$ respectively, which are close to each other.
+\[\theta_{1|1}=P(W=1|X=1)=(159+72)/(17+159+9+72)=0.899\]
+\[\theta_{1|0}=P(W=1|X=0)=(75+114)/(25+75+29+114)=0.778\]
+\item Find $\frac{n_{11}}{n_{.1}}$ and compare with $\alpha_1\theta_{1|1}+(1-\alpha_1)\theta_{1|0}$.
+\[\frac{n_{11}}{n_{.1}}=(114+72)/(29+9+114+72)= 0.830\] And, 
+\[\alpha_1=P(X=1|Y=1)=(9+72)/(29+9+114+72)=0.362\]
+\[\alpha_1\theta_{1|1}+(1-\alpha_1)\theta_{1|0}=0.362\times 0.899+(1-0.362)\times 0.778 = 0.822\]
+The values of $\frac{n_{11}}{n_{.1}}$ and $\alpha_1\theta_{1|1}+(1-\alpha_1)\theta_{1|0}$ are $0.830$ and $0.822$ respectively, which are close to each other.
 
 \item Find $\frac{n_{11}}{n_{.1}}-\frac{n_{10}}{n_{.0}}$ and compare with $(\alpha_1-\alpha_0)(\theta_{1|1}+\theta_{0|0}-1)$.
-Use simulation data can get another na\"ive estimate
-\[\frac{n_{10}}{n_{.0}}=234/(42+234)= 0.848\] Then,
-\[\frac{n_{11}}{n_{.1}}-\frac{n_{10}}{n_{.0}}= 0.830-0.848= -0.018\]
-Moreover,
-\[\begin{array}{rcl}
-\alpha_0=P(X=1|Y=0)&=&\frac{P(X=1,Y=0)}{P(X=1,Y=0)+P(X=0,Y=0)}\\
-&=& \frac{0.7\times 0.5}{0.7\times 0.5+0.4\times 0.5} = 0.636\\
-\end{array}\]
-\[(\alpha_1-\alpha_0)(\theta_{1|1}+\theta_{0|0}-1)=(0.333-0.636)\times(0.9-0.75)= -0.045\]
-The values of $\frac{n_{11}}{n_{.1}}-\frac{n_{10}}{n_{.0}}$ and $(\alpha_1-\alpha_0)(\theta_{1|1}+\theta_{0|0}-1)$ are $-0.018$ and $-0.045$ respectively, which are close to each other either.
+\[\frac{n_{10}}{n_{.0}}=(75+159)/(25+17+75+159)= 0.848\]
+\[\frac{n_{11}}{n_{.1}}-\frac{n_{10}}{n_{.0}}= 0.830-0.847= -0.017\] And,
+\[\alpha_0=P(X=1|Y=0)=(17+159)/(25+17+75+159)=0.638\]
+\[(\alpha_1-\alpha_0)(\theta_{1|1}+\theta_{0|0}-1)=(\alpha_1-\alpha_0)(\theta_{1|1}-\theta_{1|0})=-0.033\]
+The values of $\frac{n_{11}}{n_{.1}}-\frac{n_{10}}{n_{.0}}$ and $(\alpha_1-\alpha_0)(\theta_{1|1}+\theta_{0|0}-1)$ are $-0.017$ and $-0.033$ respectively, which are close to each other either.
 
 \end{enumerate}
 %------------------------------------------------------------------
