@@ -8,27 +8,27 @@ subject <- sample(letters[1:20], 1000, replace = T)
 data <- data.frame(shop.time, subject, price)
 
 #(a)
-order.data <- data[order(data$subject), ]
+order.data <- data[order(data$subject), ]    #5pt
 
 #(b)
 j.last.index <- max(which(order.data$subject == "j"))
-data.a.to.j <- order.data[1:j.last.index, ]
-boxplot(data.a.to.j$price ~ data.a.to.j$subject, xlab = "subject", ylab = "cost")
+data.a.to.j <- order.data[1:j.last.index, ]    #5pt
+boxplot(data.a.to.j$price ~ data.a.to.j$subject, xlab = "subject", ylab = "cost")    #5pt     
 
 #(c)
 shop.avg <- NULL
 for (i in 1:20){
-  per.sub.price <- order.data$price[order.data$subject == letters[i]]
-  mean.per.sub.price <- mean(per.sub.price)
+  per.sub.price <- order.data$price[order.data$subject == letters[i]]    #3pt
+  mean.per.sub.price <- mean(per.sub.price)    #3pt
   names(mean.per.sub.price) = letters[i]
-  shop.avg <- c(shop.avg, mean.per.sub.price)
+  shop.avg <- c(shop.avg, mean.per.sub.price)    #4pt
 }
 shop.avg
 
 #(d)
 a.last.index <- max(which(order.data$subject == "a"))
-data.a <- order.data[1:a.last.index, ]
-order.data.a <- data.a[order(data.a$shop.time), ]
-plot(order.data.a$shop.time, order.data.a$price, type = "b", pch = 20, xlab = "time", ylab = "cost")
+data.a <- order.data[1:a.last.index, ]    #3pt
+order.data.a <- data.a[order(data.a$shop.time), ]    #3pt
+plot(order.data.a$shop.time, order.data.a$price, type = "b", pch = 20, xlab = "time", ylab = "cost")    #4pt
 
 
