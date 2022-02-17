@@ -1,0 +1,150 @@
+% !TEX TS-program = xelatex								
+% !TEX encoding = UTF-8
+% 套件設定
+\documentclass[12pt, a4paper, fleqn]{article} 		% 預設值為 10pt.
+%\usepackage[left=1.5cm, right=1.5cm, 
+%			bottom=2cm, top=25mm, 
+%			marginparwidth=0pt, 
+%			headheight=25mm]{geometry}		
+\usepackage[left=3.18cm, right=3.18cm, 		% 版面大小（Socail Science）.
+			bottom=2.54cm, top=2.54cm, 
+			marginparwidth=0pt, 
+			headheight=2.54cm]{geometry}
+%\usepackage{multicol}						% 多欄
+\usepackage{titlesec}						% 自訂標題
+\usepackage{zhnumber}						% 中文編號
+\usepackage{tocloft}						% 修正目錄標號
+\usepackage{fancyhdr}						% 套用頁首頁尾		
+\usepackage{fontspec} 						% XeLaTeX 的字型選擇
+\usepackage{fourier}						% Adobe Utopia 數學風格
+\usepackage{xeCJK}							% 中文使用 XeCJK.
+\usepackage{indentfirst}					% 首行縮排
+%\usepackage{xcolor}							% 顏色套件
+\usepackage{setspace}						% 指定行距
+\usepackage{xunicode} 						% Unicode support for LaTeX character names.
+\usepackage{amsmath, amssymb, amsthm}		% math­e­mat­i­cal fea­tures found in AMS-TEX.
+\usepackage{enumerate, enumitem}			% Lists.
+\usepackage{graphicx, subfig, float} 		% 圖片套件.
+\usepackage{wrapfig, subfig, sidecap}		% 圍繞圖片，並排圖片，圖名放置。
+\usepackage{array, booktabs, threeparttable}% 表格套件
+\usepackage{longtable, dcolumn}				% 長表格、表格內小數點對齊
+%\usepackage{listings, minted}				% 映出程式碼
+\usepackage{listings}	        			% 映出程式碼
+%\usepackage[bibstyle=numeric]{biblatex}	% 參考書目
+\usepackage[style=apa]{biblatex}			% 參考書目(Socail Science)
+\usepackage{multirow}                       % 表格工具
+\usepackage[table,xcdraw]{xcolor}           % 表格工具
+\usepackage{pdfpages}
+\usepackage{bm}								% 數學粗體
+
+%--------------------------------------------------------------------------------------------------------------------------------------------
+% 主字型設定
+\setCJKmainfont{標楷體}						% 中文內文字型
+\setmainfont{Times New Roman}				% 英文內文字型
+\setsansfont{Arial}							% 英文無襯袖字型  {\sffamily ...}
+\setmonofont{Courier New}					% 英文等寬度字型  {\ttfamily ...}
+
+%--------------------------------------------------------------------------------------------------------------------------------------------
+% 其他字型設定
+\newfontfamily{\A}{Arial}
+\newfontfamily{\C}{Cambria}				
+\newfontfamily{\SC}[Scale=0.9]{Cambria}
+\newfontfamily{\TN}{Times New Roman}
+\newCJKfontfamily{\K}{標楷體}
+\newCJKfontfamily{\MB}{微軟正黑體}
+\newCJKfontfamily{\NM}[Scale=0.9]{新細明體}			% 縮小版新細明體
+\newCJKfontfamily{\BNM}{王漢宗粗明體繁}				% 粗體新細明體
+%\newCJKfontfamily{\CwF}{cwTeX Q Fangsong Medium}	% CwTex 仿宋體
+%\newCJKfontfamily{\CwH}{cwTeX Q Hei Bold}			% CwTex 粗黑體
+%\newCJKfontfamily{\CwK}{cwTeX Q Kai Medium}   		% CwTex 楷體
+%\newCJKfontfamily{\CwM}{cwTeX Q Ming Medium}		% CwTex 明體
+
+
+%--------------------------------------------------------------------------------------------------------------------------------------------
+\XeTeXlinebreaklocale "zh"					% 中文才能自動換行
+\XeTeXlinebreakskip = 0pt plus 1pt			% 中文才能自動換行
+\parindent=2em								% 首行空兩個字
+\setlist{nosep}								% 阻止 list 自動間隔
+%--------------------------------------------------------------------------------------------------------------------------------------------
+\newcommand{\fib}[1]{\left(#1\right)}		% 設定 ()
+\newcommand{\seb}[1]{\left[#1\right]}		% 設定 []
+\newcommand{\thb}[1]{\left\{#1\right\}}		% 設定 []
+\newcommand{\bsq}{\hfill$\blacksquare$}    	% 設定 \blacksquare
+\newcommand{\pr}{\text{P\,}}    			% 設定 P
+\newcommand{\Exp}{\text{E\,}}    			% 設定 E
+\newcommand{\var}{\text{Var\,}}    			% 設定 Var
+\newcommand{\cov}{\text{Cov\,}}    			% 設定 Var
+%--------------------------------------------------------------------------------------------------------------------------------------------
+\renewcommand{\tablename}{表}						% 改變表格標號文字為中文的「表」（預設為 Table）
+\renewcommand{\figurename}{圖}						% 改變圖片標號文字為中文的「圖」（預設為 Figure）
+\newcommand{\loflabel}{圖} 							% 圖目錄出現 圖 x.x 的「圖」字
+\newcommand{\lotlabel}{表}  							% 表目錄出現 表 x.x 的「表」字
+
+\renewcommand{\contentsname}{\hfill{\fontsize{16}{0}\selectfont 目次}\hfill}  
+\renewcommand{\cftaftertoctitle}{\hfill}
+\renewcommand{\listtablename}{\hfill{\fontsize{16}{0}\selectfont 表次}\hfill} 
+\setlength{\cftfigindent}{0pt} 
+\renewcommand{\listfigurename}{\hfill{\fontsize{16}{0}\selectfont 圖次}\hfill}  
+\setlength{\cfttabindent}{0pt}
+
+%--------------------------------------------------------------------------------------------------------------------------------------------
+\setcounter{tocdepth}{2}							% 設定目錄只到subsection
+\renewcommand\thesection{第\zhnum{section}章}		% 設定section標號中文
+\renewcommand\thesubsection{第\zhnum{subsection}節}
+\renewcommand\thesubsubsection{\zhnum{subsubsection}、}
+
+\titleformat{\section}[hang]{\centering\fontsize{18}{0}\selectfont}		% 設定 section 標號、標題字體樣式
+{\thesection}{1em}{}													% 設定 section 標號與標題間格
+\titlespacing{\section}{0pt}{*10}{*5}									% 設定 section 段落間格
+\titleformat{\subsection}[hang]{\centering\fontsize{16}{0}\selectfont}
+{\thesubsection}{1em}{}
+\titlespacing{\subsection}{0pt}{*10}{*3}	
+\titleformat{\subsubsection}[hang]{}
+{\thesubsubsection}{0.1cm}{}
+
+
+\cftsetindents{section}{0em}{4em}					% 設定 section 目錄間格{標號前空格數}{標號前+標題前空格數}
+\cftsetindents{subsection}{1em}{4em}
+
+%\addtolength\cftsecnumwidth{2em}
+%\addtolength\cftsubsecnumwidth{2em}
+%\addtolength\cftsubsubsecindent{1em}
+
+
+
+%--------------------------------------------------------------------------------------------------------------------------------------------
+% 設定顏色 color Table: http://latexcolor.com
+\definecolor{slight}{gray}{0.9}						
+
+%--------------------------------------------------------------------------------------------------------------------------------------------
+% 映出程式碼 \begin{lstlisting}
+\lstset
+{	language=R,  %[LaTeX]TeX
+    breaklines=true,
+    basicstyle=\linespread{0.9}\tt,
+    keywordstyle=\color{black}\bfseries,
+    identifierstyle=\color{black},
+%   commentstyle=\color{limegreen}\itshape,
+    stringstyle=\sffamily,
+    showstringspaces=false,
+    frame=lines,							%default frame=none 
+    rulecolor=\color{black},
+    framerule=0.2pt,						%expand outward 
+    framesep=3pt,							%expand outward
+    xleftmargin=2em,						%to make the frame fits in the text area. 
+    xrightmargin=3pt,						%to make the frame fits in the text area. 
+    tabsize=4,								%default :8 only influence the lstlisting and lstinline.
+    escapeinside=`'                         %to cancel listing in part
+}
+
+%\usemintedstyle{borland}
+%\lstset{language=SAS, 
+%  breaklines=true,  
+%  basicstyle=\ttfamily\bfseries,
+%  columns=fixed,
+%  keepspaces=true,
+%  identifierstyle=\color{blue}\ttfamily,
+%  keywordstyle=\color{cyan}\ttfamily,
+%  stringstyle=\color{purple}\ttfamily,
+%  commentstyle=\color{green}\ttfamily,
+%  } 

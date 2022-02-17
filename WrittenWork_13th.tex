@@ -1,0 +1,382 @@
+\input{Preamble}
+\addbibresource{Reference.bib}  
+\title{\textbf{Fixed-effect and Random-effect variable selection in linear mixed models using R2 statistics}}
+\author{吳書恆}
+\date{June, 2022}
+\pagenumbering{roman}
+%文章開始---------
+\begin{document}
+\fontsize{12}{2.2em}\selectfont
+
+{\let\newpage\relax\maketitle}
+\thispagestyle{empty}
+\newpage 
+
+
+{\large \textbf{摘要}}
+\par
+本研究旨在探討...。
+\newpage
+\tableofcontents
+\newpage 
+\renewcommand{\numberline}[1]{\loflabel~#1\hspace*{1em}}
+\listoffigures
+\newpage 
+\renewcommand{\numberline}[1]{\lotlabel~#1\hspace*{1em}}
+\listoftables 
+\newpage 
+ 
+%======================================================================================================%
+\pagenumbering{arabic}
+\section{緒論}
+這邊假設群集與另一個群集之間獨立，而每個群集之下數個樣本或觀測值可以具有某種程度的相關，由於這些樣本彼此之間具有相關性的假設只在該群集之下，因此這種資料具有巢狀特性（Nesting），換言之，樣本嵌套在群集裏頭，類似這樣的，（\cite{link1995social}）\par
+隨著...
+
+
+
+
+\newpage 
+%======================================================================================================%
+\section{文獻回顧}
+\subsection{混合模型}
+首先先說明混合模型，定義特定觀測值表示型式（observation‑specific）的混合模型為（Harville, 1977; Laird andWare, 1982)
+\begin{equation}\label{eq:mix.obs}
+Y_{ij}=\bm x_{ij}'\bm\beta+\bm z_{ij}'\bm b_i+e_{ij},\quad i=1, \ldots, m,\quad j=1, \ldots, n_i
+\end{equation}
+$Y_{ij}$為第$i$個群集（cluster）之下第$j$個子樣本（subsample）的觀測值，$\bm x_{ij}$為第$i$個群集之下第$j$個子樣本且維度$p\times1$的固定效果設計矩陣（fixed-effects design matrix），$\bm\beta$為未知的常數向量且維度$p\times1$的固定效果參數（fixed-effect parameters），$\bm z_{ij}$為第$i$個群集之下第$j$個子樣本且維度為$q\times 1$的隨機效果設計矩陣（random-effects design matrix），$\bm b_i$為第$i$個群集、維度$q\times1$且不可觀察到的隨機效果向量（vector of unobservable random effects），$e_{ij}$為第$i$個群集之下第$j$個子樣本且不可觀察到的隨機誤差值。\par
+另外比較常見的表達方式是將同個群體的觀測值用向量表示，稱為特定群體表示型式（subject‑specific, matrix notation），如下，
+\begin{equation}\label{eq:mix.sub}
+\bm Y_i=\bm X_i\bm\beta+\bm Z_i\bm b_i+\bm e_i
+\end{equation}
+其中$\bm Y_i=(Y_{i1},\ldots,Y_{in_i})'$、$\bm X_i=(\bm x_{i1},\ldots,\bm x_{in_i})'$、$\bm Z_i=(\bm z_{i1},\ldots,\bm z_{in_i })'$以及$\bm e_i=(e_{i1},\ldots,e_{in_i})'$，混合模型在統計上會假設不可觀察到的$\bm b_i$服從$N_q (\bm 0,\bm G)$、$e_i$服從$N_{n_i} (\bm 0,\bm R_i)$，$\bm G$為未知且維度為$q\times q$的隨機效果共變異數矩陣，$\bm R_i$為第$i$個群集且維度為$n_i\times n_i$的組內誤差共變異數矩陣，而且$\bm b_1,\ldots,\bm b_m$、$\bm e_1,\ldots,\bm e_m$、$\bm b_i$與$\bm e_i$之間皆獨立，在這個假設成立之下，第$i$個群集$\bm Y_i$的變異數可表示為$\bm \Sigma_i=\bm Z_i\bm G\bm Z_i'+\bm R_i$。式(\ref{eq:mix.obs})和式(\ref{eq:mix.sub})雖符號不同但表達同樣的意思，式(\ref{eq:mix.obs})在定義共變數的拆解型式時會很好用，式(\ref{eq:mix.sub})則是較好說明混合模型的統計模型假設。\par
+
+定義時間相依共變數拆解（TDC）過後的混合模型：
+\begin{equation}\label{eq:mix.tdc1}
+Y_{ij}=\bar{\bm x}_{i.}'\bm\beta_B+\fib{\bm x_{ij}-\bar{\bm x}_{i.}}'\bm\beta_W+u_i+\fib{\bm z_{ij}-\bar{\bm z}_{i.}}'\bm v_i+e_{ij}
+\end{equation}
+由於截距項和時間獨立共變數在上式的$\fib{\bm x_{ij}-\bar{\bm x}_{i.}}'$和$\fib{\bm z_{ij}-\bar{\bm z}_{i.}}'$中會全都等於$0$，因此沒必要去估計這些變數的$\beta_W$和$v_i$。重新定義拆解過後的混合模型，
+\begin{equation}\label{eq:mix.tdc2}
+y_{ij}=\bar{\bm x}_{i.}'\bm\beta_B+\bm w_{ij}'\bm\beta_W+u_i+\bm s_{ij}'\bm v_i+e_{ij}
+\end{equation}
+其中，\\
+$\bm\beta_B$維度$(p\times1)$的fixed時間獨立共變數、相依共變數組間效果係數，\\
+$\bm\beta_W$維度$(r\times1)$的fixed時間相依共變數組內效果係數，\\
+$u_i=$維度$(1\times1)$的random截距項，\\
+$v_i=$維度$((q-1)\times1)$的random斜率項，且$(u_i, v_i)'\sim N_q(0,\bm T)$，$T$可以是任何形式。\\
+$w_{ij}=$維度$(k\times1)$的fixed時間相依共變數組內效果矩陣，\\
+$s_{ij}=$維度$((q-1)\times1)$的random時間相依共變數組內效果矩陣，且$q-1\leq r$。 \\
+若random共變數矩陣放入所有時間相依共變數組內效果，拆解過後的混合模型可表示為：
+\begin{eqnarray}\label{eq:mix.tdc3}
+Y_{ij} &=& \bar{\bm x}_{i.}'\bm\beta_B+\bm w_{ij}'\bm\beta_W+u_i+\bm w_{ij}'\bm v_i+e_{ij} \\
+       &=& \bar{\bm x}_{i.}'\bm\beta_B+\bm w_{ij}'(\bm\beta_W+\bm v_i)+u_i+e_{ij} \nonumber 
+\end{eqnarray}
+
+
+
+
+\newpage 
+%======================================================================================================%
+\subsection{解釋變異}
+解釋變異（explained variance）在迴歸模型中是一個很常見的指標，他描述模型的自變項（或解釋變數）解釋依變項（或反應變數）的變異程度，反過來說，未解釋變異可以提供模型的自變項解釋不足的程度，這個特性又叫做缺適性（lack-of-fit），在迴歸裏頭，描述模型解釋變異比例（explained proportion of variance）的指標為相關決定係數（coefficient of determination），表示為$R^2$，在概念上，
+\begin{eqnarray}
+R^2 &=& \frac{\text{該模型所有自變數的解釋變異}}{\text{依變數的變異}}\nonumber \\
+&=& 1-\frac{\text{該模型所有自變數的未解釋變異}}{\text{依變數的變異}}\nonumber 
+\end{eqnarray}\par
+在
+
+\begin{equation}\label{eq:r2.composition}
+100\%=R_C^2+\frac{\sigma^2}{\var(Y_{ij})}, \text{ where } R_C^2=R_M^2+R_u^2+R_v^2=(R_B^2+R_W^2)+R_u^2+R_v^2
+\end{equation}
+
+\subsection{AIC}
+\begin{equation}\label{eq:AIC}
+AIC = −2\text{ln}(f(y|\hat\beta, \hat\theta))+2k
+\end{equation}
+\begin{equation}\label{eq:AICc}
+AICc = AIC + \frac{2(k+1)(k+2)}{n−k−2}
+\end{equation}
+where k is the number of parameters (including the intercept) in the model.
+\begin{equation}\label{eq:mAIC}
+mAIC = −2\text{ln}(f(y|\hat\beta, \hat\theta)) + 2\alpha_n(p+q)
+\end{equation}
+$\alpha_n = 1$ in the infinite sample form or $\alpha_n = n/(n−p−q−1)$ in the finite sample form (Sugiura, 1978).
+\begin{equation}\label{eq:cAIC}
+cAIC = −2\text{ln}(f(y|\hat\beta, \hat b, \hat\theta) + 2(\rho + 1),
+\end{equation}
+\[\rho=trace\fib{\begin{pmatrix}X'X&X'Z\\Z'X&Z'Z+G^{-1}\end{pmatrix}^{-1}
+\begin{pmatrix}X'X&X'Z\\Z'X&Z'Z\end{pmatrix}}\]
+
+
+
+
+\newpage 
+%======================================================================================================%
+\section{$R^2$成分納入精簡指數}
+\subsection{定義$R^2(\alpha)$}
+通常模型變數越多解釋力也會越高，但當過多變數放入模型中，可能會導致共線性(Collinearity)的問題，或是資料樣本數不夠導致估計值無法收斂。不過，在進行迴歸分析之前，能夠發現這些問題是可以提早解決的，像是對變數做轉換來消除之間的相關性，又或是再補充樣本解決變數維度過高的問題，但模型變數的平衡與抉擇還是要歸咎回分析的目的與成本，倘落研究的目的著重在預測(forecasting)新樣本，那精簡就會是個不錯的選擇，已經有許多研究發現過多解釋變數會導致預測效果的邊際效應遞減，同時在解釋模型時也較容易；另外，當個體追蹤的時間點不夠多或中斷追蹤的時間點過多，隨機項係數的推估就有可能會估計不出來，因此追求較精簡在大部分實務上是其有必要性的。
+
+前面已提及調整後的R^2由於混合模型的$R^2$成分容易選到較為複雜的模型，但$R^2$成分並沒辦法直接用一般迴歸調整後的$R^2$精簡的特性（分子分母除以相對應自由度），因此考慮對$R^2$成分做簡單地調整，這個調整是很直白的。令可調控的精簡指數為$\alpha$，且$\alpha$介於0到1之間，則加入精簡指數$R^2$成分為
+\begin{eqnarray}\label{eq:r2alpha}
+R^2(\alpha) &=& (1-\alpha)\times R^2+\alpha\times\frac{R^2}{\#(\text{parameter})}, \quad\alpha\in[0, 1] \\
+            &=& \fib{1-\alpha+\frac{\alpha}{\#(\text{parameter})}}\times R^2 \nonumber 
+\end{eqnarray}
+最不精簡的特性為考量總體參數解釋量，反映在$(1-\alpha)\times R^2$，而最精簡模型的特性為考量平均一個參數解釋量，反映在$\frac{R^2}{\#(\text{parameter})}\cdot\alpha$，其中$\#(\text{parameter})$表示該$R^2$成分對應模型的部分參數個數。想要達到多精簡是可以調整的，因此對這兩個解釋量取加權平均，權重由$\alpha$決定，$\alpha$越接近0表示越不精簡，$\alpha$越接近1則越精簡。
+
+\subsection{套用至$R_M^2(\alpha)$、$R_v^2(\alpha)$}
+\begin{equation}\label{eq:r2malpha}
+R_M^2(\alpha)=\fib{1-\alpha+\frac{\alpha}{p}}\times R_M^2
+\end{equation}
+\begin{equation}\label{eq:r2valpha}
+R_v^2(\alpha)=\fib{1-\alpha+\frac{\alpha}{\sum_{i=1}^q i}}\times R_v^2
+\end{equation}
+\subsection{使用$R^2(\alpha)$與選擇$\alpha$}
+假如要比較固定效果的解釋量，則計算要比較模型的$R_M^2(\alpha)$，最後選擇最大$R_M^2(\alpha)$的模型；假如比較隨機斜率效果的解釋量，則計算要比較模型的$R_v^2(\alpha)$，最後選擇最大$R_v^2(\alpha)$的模型。
+選混合模型時的變數時，通常不會同時比較固定效果與隨機效果，這兩者在估計時會彼此影響這特性已在第三節討論過，因此通常選模會考慮以下三種情形，一為已知fixed只選random部分；二為已知random只選fixed部分；三為random和fixed未知。
+
+\newpage 
+%======================================================================================================%
+\section{資料模擬與實際資料}
+\subsection{資料模擬}
+為了方便表示模擬的各種模型，定義模型符號如下：\\
+\[M(fixed,random)\]
+下標前面表示隨機部分的模型類型，後面表示固定部分，模型類型符號包含：\\
+$over=$超飽和模型，包含全部顯著與部分不顯著變數，\\
+$full=$完整模型，包含全部顯著，\\
+$reduce=$精簡模型，只包含部分不重要的顯著變數，\\
+$-reduce=$過度精簡模型，只包含部分重要的顯著變數，\\
+$other=$其他模型，包含部分顯著與部分不顯著變數。\\
+舉例：$M(over,full)$表示模型的固定是飽和、隨機部分是超飽和。\\
+模擬的主要流程\\
+\begin{enumerate}
+\item 產生具有相關性的資料：$m=100$，$n_i=10$，組間變數有13個，組內有6個\\
+$\beta_B=(-4, 5, -6, 8, -2,0,0,0,0,0,0,0,0,0)^T$,\\
+$\beta_W=(1,-1,0,0,0,0)^T$,\\
+\[T=\begin{pmatrix}
+31&12&0&0&0&0&0\\
+12&28&0&0&0&0&0\\
+0&0&25&0&0&0&0\\0&0&0&7&0&0&0\\
+0&0&0&0&3&0&0\\
+0&0&0&0&0&0&0\\
+0&0&0&0&0&0&0\\
+\end{pmatrix}\]
+顯著地的固定效果變數為Vb1,Vb2,Vb3,Vb4,Vw1,Vw2，重要的顯著變數只有Vb1,Vb2,Vb3；顯著地的隨機效果變數Vb1,Vb2,Vb3,Vb4，重要的顯著變數只有Vb1,Vb2。
+\item 挑選出候選模型：決定候選模型就是在決定剔除變數的順序，在所有變數都放入的情況之下，透過向後選變數（backward selection）的概念，陸續剔除最不重要的變數，但是直至模型剩下最後一個變數才停止，並非完全等於向後選變數的方式。根據向後選變數的原理，會先從最不重要的變數開始剔除，也就是該參數的統計量最小的開始移除，最後模型剩下的變數通常是最重要，其參數的統計量也最大。例如，如果變數有10個，則候選模型就會有10個，其中第一個模型會包含所有10個變數，第二個模型會剔除1個最不重要的變數剩下9個，第三個模型剩下8個，以此類推，到第十個模型會剩下1個。
+\item 算出候選模形的選模準則：根據前個步驟算出的候選模型，分別計算不同精簡程度的$R^2$成分。
+\item 根據選模準則挑選最佳模型：不同精簡程度$R^2$成分挑選最佳模型的方式都是依據最大值（AIC系列則皆是最小值），並記錄下該模型。
+\item 重複執行一到四步驟，直到執行完1000次，觀察各種模型的比例。
+\end{enumerate}\par
+這邊要注意，候選模型可能不包含以上指定的完整模型或精簡模型，因為何種變數會納入候選模型是交給向後選模的方式決定，不直接指定候選模形而是透過選變數的方式的原因，是考量實務上變數量多的情形，因此模擬結果也會收到向後選變數的影響，這也比較貼近實務的情形。\par
+以下將不同精簡模型的類型區分為三種，每一種都與要比較的完整模型的參數進行比較。首先先比較當隨機已知時，只選固定；再來是已知固定只選隨機部分；最後同時選固定和隨機。\par
+
+\begin{table}[h]
+\centering
+\caption{Table to type1 for $R_M$.}
+\label{tab:type1rateR}
+\begin{tabular}{lrrrrr}
+\toprule
+                 & -R    & R     & F     & O     & M \\
+\midrule
+$\alpha = 0$     & NA    & 0.004 & 0.002 & 0.750 & 0.244 \\
+$\alpha = 0.1$   & NA    & 0.089 & 0.053 & 0.556 & 0.301 \\
+$\alpha = 0.2$   & NA    & 0.402 & 0.103 & 0.257 & 0.238 \\
+$\alpha = 0.3$   & NA    & 0.711 & 0.071 & 0.101 & 0.117 \\
+$\alpha = 0.4$   & NA    & 0.915 & 0.040 & 0.012 & 0.034 \\
+$\alpha = 0.5$   & NA    & 0.990 & 0.008 & NA    & 0.002 \\
+$\alpha = 0.6$   & 0.006 & 0.994 & NA    & NA    & NA \\
+$\alpha = 0.7$   & 0.034 & 0.966 & NA    & NA    & NA \\
+$\alpha = 0.8$   & 0.150 & 0.850 & NA    & NA    & NA \\
+$\alpha = 0.9$   & 0.495 & 0.505 & NA    & NA    & NA \\
+$\alpha = 1$     & 0.905 & 0.095 & NA    & NA    & NA \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[h]
+\centering
+\caption{Table to type1 for AIC.}
+\label{tab:type1rateAIC}
+\begin{tabular}{lrrrrr}
+\toprule
+      & -R    & R     & F     & O     & M \\
+\midrule
+AIC   & NA    & 0.055 & 0.050 & 0.483 & 0.412 \\
+AICc  & NA    & 0.059 & 0.053 & 0.463 & 0.424 \\
+mAIC  & NA    & 0.891 & 0.034 & 0.002 & 0.073 \\
+cAIC  & 0.103 & 0.198 & 0.030 & 0.352 & 0.317 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[h]
+\centering
+\caption{Table to type2 for $R_v$.}
+\label{tab:type2rateR}
+\begin{tabular}{lrrrrr}
+\toprule
+                 & -R    & R     & F     & O     & M \\
+\midrule
+$\alpha = 0$     & NA    & 0.002 & 0.212 & 0.786 & NA \\
+$\alpha = 0.1$   & NA    & 0.004 & 0.358 & 0.638 & NA \\
+$\alpha = 0.2$   & NA    & 0.004 & 0.544 & 0.452 & NA \\
+$\alpha = 0.3$   & NA    & 0.012 & 0.738 & 0.250 & NA \\
+$\alpha = 0.4$   & NA    & 0.042 & 0.826 & 0.132 & NA \\
+$\alpha = 0.5$   & NA    & 0.176 & 0.784 & 0.040 & NA \\
+$\alpha = 0.6$   & NA    & 0.484 & 0.510 & 0.006 & NA \\
+$\alpha = 0.7$   & NA    & 0.924 & 0.076 & NA    & NA \\
+$\alpha = 0.8$   & 0.006 & 0.990 & 0.004 & NA    & NA \\
+$\alpha = 0.9$   & 0.082 & 0.918 & NA    & NA    & NA \\
+$\alpha = 1$     & 0.794 & 0.206 & NA    & NA    & NA \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[h]
+\centering
+\caption{Table to type2 for AIC.}
+\label{tab:type2rateAIC}
+\begin{tabular}{lrrrrr}
+\toprule
+      & -R    & R     & F     & O     & M \\
+\midrule
+AIC   & NA    & NA    & 0.914 & 0.086 & NA \\
+AICc  & NA    & NA    & 0.932 & 0.068 & NA \\
+mAIC  & 0.100 & 0.900 & NA    & NA    & NA \\
+cAIC  & NA    & NA    & 0.680 & 0.320 & NA \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+
+
+\subsection{實際資料}
+
+\newpage 
+%======================================================================================================%
+\section{結論}
+過往有許多研究，...。\par
+另外，這邊建議選變數的方式為向後或逐步向後（stepwise backward selection），比起向前（forward selection）和逐步向前（stepwise forward selection），向後比較能夠保留可能顯著的變數，但當樣本數遠小於變數個數時，向後的方式可能會估計不出來，此時向前和逐步向前的方式就會比較好，另一個解決這個情形的方式是納入懲罰項進去來解決資料維度較高的情形，也就是Lasso迴歸，但Lasso…(待補)。倘落變數不多或是沒有時間成本的考量，也可考慮所有集合選變數的方式（Best subset selection）。\par
+
+\newpage 
+\addcontentsline{toc}{section}{參考書目} 
+\printbibliography[title=參考書目]
+\newpage 
+%======================================================================================================%
+\section*{附錄一、R2轉變}
+\begin{table}[h]
+\centering
+\caption{type1Rchange}
+\label{tab:type1changeR}
+\begin{tabular}{crrr}
+\toprule
+      & \multicolumn{3}{c}{Mean(SD，Min，Max)} \\
+\cmidrule{2-4}      & V3    & V2    & V1 \\
+\midrule
+1     & 0.96 (0.01,0.93,0.98) & 0.96 (0.01,0.93,0.98) & 0.96 (0.01,0.93,0.98) \\
+2     & 0.11 (0.05,0.00,0.29) & 0.53 (0.05,0.31,0.70) & 0.56 (0.05,0.39,0.70) \\
+3     & 0.11 (0.05,0.00,0.29) & 0.53 (0.05,0.31,0.70) & 0.55 (0.05,0.38,0.70) \\
+4     & 0.00 (0.00,0.00,0.00) & 0.00 (0.00,0.00,0.00) & 0.01 (0.01,0.00,0.04) \\
+5     & 0.58 (0.05,0.42,0.73) & 0.15 (0.03,0.07,0.25) & 0.13 (0.02,0.07,0.23) \\
+6     & 0.27 (0.03,0.17,0.38) & 0.27 (0.03,0.18,0.38) & 0.26 (0.03,0.18,0.38) \\
+\bottomrule
+\end{tabular}
+\end{table}
+     
+\begin{table}[h]
+\centering
+\caption{type2Rchange}
+\label{tab:type2changeR}
+\begin{tabular}{crrr}
+\toprule
+      & \multicolumn{3}{c}{Mean(SD，Min，Max)} \\
+\cmidrule{2-4}      & V3    & V2    & V1 \\
+\midrule
+1     & 0.96 (0.01,0.93,0.98) & 0.96 (0.01,0.93,0.98) & 0.96 (0.01,0.93,0.98) \\
+2     & 0.11 (0.05,0.00,0.29) & 0.53 (0.05,0.31,0.70) & 0.56 (0.05,0.39,0.70) \\
+3     & 0.11 (0.05,0.00,0.29) & 0.53 (0.05,0.31,0.70) & 0.55 (0.05,0.38,0.70) \\
+4     & 0.00 (0.00,0.00,0.00) & 0.00 (0.00,0.00,0.00) & 0.01 (0.01,0.00,0.04) \\
+5     & 0.58 (0.05,0.42,0.73) & 0.15 (0.03,0.07,0.25) & 0.13 (0.02,0.07,0.23) \\
+6     & 0.27 (0.03,0.17,0.38) & 0.27 (0.03,0.18,0.38) & 0.26 (0.03,0.18,0.38) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[h]
+\centering
+\caption{type3Rchange}
+\label{tab:type3changeR}
+\begin{tabular}{crrrr}
+\toprule
+      & \multicolumn{4}{c}{Mean(SD，Min，Max)} \\
+\cmidrule{2-5}      & V3    & V2    & V1    & V4 \\
+\midrule
+1     & 0.81 (0.03,0.73,0.88) & 0.92 (0.01,0.89,0.95) & 0.81 (0.03,0.72,0.88) & 0.92 (0.01,0.88,0.95) \\
+2     & 0.11 (0.05,0.01,0.31) & 0.11 (0.05,0.01,0.31) & 0.53 (0.05,0.34,0.68) & 0.53 (0.05,0.35,0.67) \\
+3     & 0.11 (0.05,0.01,0.31) & 0.11 (0.05,0.01,0.31) & 0.53 (0.05,0.34,0.68) & 0.53 (0.05,0.35,0.67) \\
+4     & 0.00 (0.00,0.00,0.00) & 0.00 (0.00,0.00,0.00) & 0.00 (0.00,0.00,0.00) & 0.00 (0.00,0.00,0.00) \\
+5     & 0.58 (0.05,0.41,0.70) & 0.58 (0.05,0.43,0.71) & 0.15 (0.03,0.08,0.25) & 0.15 (0.02,0.09,0.24) \\
+6     & 0.13 (0.02,0.07,0.20) & 0.23 (0.03,0.15,0.34) & 0.13 (0.02,0.07,0.20) & 0.24 (0.03,0.15,0.33) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section*{附錄二、精簡模型與完整模型模擬參數比較}
+\begin{table}[h]
+\centering
+\caption{type1beta}
+\label{tab:type1beta}
+\begin{tabular}{crrr}
+\toprule
+      & \multicolumn{3}{c}{Mean(SE，SD，CP(95\%))} \\
+\cmidrule{2-4}      & V3    & V2    & V1 \\
+\midrule
+1     & 0.01 (1.14,1.20,0.94) & -0.02 (0.56,0.59,0.93) & -0.02 (0.53,0.55,0.94) \\
+2     & NA (NA,NA,NA) & -0.00 (0.56,0.58,0.94) & -0.01 (0.53,0.54,0.94) \\
+3     & NA (NA,NA,NA) & -0.00 (0.56,0.59,0.93) & -0.01 (0.53,0.56,0.94) \\
+4     & NA (NA,NA,NA) & NA (NA,NA,NA) & -0.01 (0.53,0.57,0.93) \\
+5     & NA (NA,NA,NA) & NA (NA,NA,NA) & -0.00 (0.54,0.56,0.93) \\
+6     & NA (NA,NA,NA) & NA (NA,NA,NA) & -0.00 (0.51,0.52,0.94) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[h]
+\centering
+\caption{type2T}
+\label{tab:type2T}
+\begin{tabular}{crrr}
+\toprule
+      & \multicolumn{3}{c}{Mean(SD，CP(95\%))} \\
+\cmidrule{2-4}      & V3    & V2    & V1 \\
+\midrule
+1     & 0.57 (5.18,0.97) & 0.32 (4.57,0.96) & 0.35 (4.42,0.95) \\
+2     & 0.52 (4.13,0.94) & 0.27 (3.66,0.96) & 0.31 (3.62,0.96) \\
+3     & 0.64 (4.41,0.97) & 0.84 (4.07,0.98) & 0.75 (4.06,0.96) \\
+4     & NA (NA,NA) & -0.09 (3.73,0.97) & -0.13 (3.67,0.95) \\
+5     & NA (NA,NA) & NA (NA,NA) & 0.06 (0.90,0.97) \\
+6     & NA (NA,NA) & NA (NA,NA) & 0.02 (0.63,0.95) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[h]
+\centering
+\caption{type3betaT}
+\label{tab:type3betaT}
+\begin{tabular}{crrrr}
+\toprule
+      & \multicolumn{4}{c}{Mean(SE，SD，CP(95\%))} \\
+\cmidrule{2-5}      & V3    & V2    & V1    &  \\
+\midrule
+1     & 0.03 (1.17,1.16,0.95) & 0.04 (1.15,1.15,0.95) & 0.04 (0.60,0.61,0.94) & 0.05 (0.57,0.60,0.93) \\
+2     & NA (NA,NA,NA) & NA (NA,NA,NA) & -0.02 (0.60,0.62,0.94) & -0.01 (0.57,0.61,0.93) \\
+3     & NA (NA,NA,NA) & NA (NA,NA,NA) & -0.00 (0.61,0.63,0.94) & 0.01 (0.58,0.61,0.94) \\
+4     & 104.72 (NA,19.82,0.00) & 104.77 (NA,19.32,0.00) & 4.43 (NA,5.79,0.90) & 4.41 (NA,5.38,0.90) \\
+5     & 0.44 (NA,7.24,0.49) & 0.51 (NA,6.88,0.46) & 0.66 (NA,4.10,0.94) & 0.68 (NA,3.82,0.94) \\
+6     & 1.32 (NA,4.98,0.93) & 1.25 (NA,4.50,0.93) & 1.33 (NA,4.94,0.94) & 1.25 (NA,4.49,0.94) \\
+7     & NA (NA,NA,NA) & 0.63 (NA,3.93,0.95) & NA (NA,NA,NA) & 0.63 (NA,3.93,0.95) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+
+\end{document}
