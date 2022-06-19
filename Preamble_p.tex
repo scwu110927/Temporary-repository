@@ -1,0 +1,84 @@
+% !TEX TS-program = xelatex
+% !TEX encoding = UTF-8 Unicode
+%\documentclass[14pt, handout]{beamer}				% for print
+\documentclass[11pt]{beamer}			% for projector
+%- begin of Beamer setting------------------------------------------------------------------------------------------------------------------
+
+\usetheme[secheader]{Boadilla}
+\usefonttheme{structurebold}
+\useinnertheme{circles}
+%\usepackage{xmpmulti}
+\linespread{1.3}
+% 設定顏色 color Table: http://latexcolor.com
+\definecolor{airforceblue}{rgb}{0.36, 0.54, 0.66}
+\usecolortheme[named=airforceblue]{structure}
+
+
+%- end of Beamer setting--------------------------------------------------------------------------------------------------------------------
+
+\usepackage{fontspec}								% Font selection for XeLaTeX
+\usepackage{xeCJK}									% 中文使用 XeCJK
+\usepackage{xunicode}								% Unicode support 
+\usepackage{amsmath, amssymb, bm}					% amsthm
+%\usepackage{wasysym}								% 特殊符號 http://detexify.kirelabs.org/symbols.html
+\usepackage{enumerate}
+\usepackage{array}
+\usepackage{graphicx, subfig, float}				% 圖片套件
+\usepackage{booktabs, lscape, threeparttable, multirow}
+\usepackage{pgf,pgfpages}
+\usepackage{cancel}
+%\usepackage{fourier}								% Adobe Utopia
+\usepackage{listings}
+\usepackage{hyperref}
+\usepackage{natbib}									% 參考書目
+\usepackage{multicol}								% 目錄兩欄
+
+%-------------------------------------------------------------------------------------------------------------------------------------------
+% 主字型設定
+\setCJKmainfont{cwTeX Q Fangsong Medium}			% 設定中文內文字型
+				[BoldFont=cwTeX Q Hei Bold]			% 設定中文粗體字型
+\setmainfont{Times New Roman}						% 設定英文內文字型
+\setsansfont{Cambria}								% 設定英文無襯袖字型 used with {\sffamily }
+\setmonofont{Courier New}							% 設定英文等寬度字型 used with {\ttfamily }
+
+% 其他字型設定			
+\newfontfamily{\A}{Arial}
+\newfontfamily{\SC}[Scale=0.9]{Cambria}
+\newfontfamily{\SCN}[Scale=0.9]{Courier New}
+\newfontfamily{\TT}[Scale=0.8]{Times New Roman}
+%\newCJKfontfamily{\MB}{微軟正黑體}
+%\newCJKfontfamily{\SM}[Scale=0.8]{新細明體}			% 縮小版新細明體
+%\newCJKfontfamily{\K}{標楷體}
+\newCJKfontfamily{\CF}{cwTeX Q Fangsong Medium}		% CwTex 仿宋體
+\newCJKfontfamily{\CB}{cwTeX Q Hei Bold}			% CwTex 粗黑體
+\newCJKfontfamily{\CK}{cwTeX Q Kai Medium}   		% CwTex 楷體
+\newCJKfontfamily{\CM}{cwTeX Q Ming Medium}			% CwTex 明體
+\newCJKfontfamily{\CY}{cwTeX Q Yuan Medium}			% CwTex 圓體	
+
+%-------------------------------------------------------------------------------------------------------------------------------------------
+
+\XeTeXlinebreaklocale "zh"                  		%這兩行一定要加，中文才能自動換行
+\XeTeXlinebreakskip = 0pt plus 1pt     				%這兩行一定要加，中文才能自動換行
+
+%-----------------------------------------------------------------------------------------------------------------------
+\renewcommand{\tablename}{表}						% 改變表格標號文字為中文的「表」（預設為 Table）
+\renewcommand{\figurename}{圖}						% 改變圖片標號文字為中文的「圖」（預設為 Figure）
+
+\usebackgroundtemplate
+{
+%\includegraphics[width=\paperwidth, height=\paperheight]{background.jpg}
+}
+
+%--------------------------------------------------------------------------------------------------------------------------------------------
+\newcommand{\fib}[1]{\left(#1\right)}		% 設定 ()
+\newcommand{\seb}[1]{\left[#1\right]}		% 設定 []
+\newcommand{\thb}[1]{\left\{#1\right\}}		% 設定 []
+\newcommand{\bsq}{\hfill$\blacksquare$}    	% 設定 \blacksquare
+\newcommand{\pr}{\text{P\,}}    			% 設定 P
+\newcommand{\Exp}{\text{E\,}}    			% 設定 E
+\newcommand{\var}{\text{Var\,}}    			% 設定 Var
+\newcommand{\cov}{\text{Cov\,}}    			% 設定 Var
+
+
+
+

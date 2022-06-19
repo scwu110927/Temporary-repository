@@ -1,0 +1,478 @@
+\input{Preamble_p}
+%-----------------------------------------------------------------------------------------------------------------------
+% 文章開始
+
+\title[懲罰R平方]{懲罰R平方對線性混合模型中重要變數選取之研究 \\
+  \large Variables selection for linear mixed models \\ with Penalized R-squared statistics}
+\author[吳書恆 (NCCU)]{指導教授：黃佳慧\ 博士 \\  \phantom{指}研究生：吳書恆\ 撰\phantom{士}}
+\institute[NCCU]{國立政治大學商學院統計學系 \\ 碩士學位論文}
+\date{民國\quad 111\quad 年\quad 7\quad 月}
+\AtBeginSection[]{\frame[t]{\frametitle{大綱}\begin{multicols}{2}\tableofcontents[current]\end{multicols}}}
+
+
+\begin{document}
+\frame{\titlepage}
+
+
+\section{緒論}
+\subsection{研究背景與動機}
+\frame{\frametitle{研究背景與動機}
+\begin{itemize}
+\item $R^2$常被用來做為解釋變異比例的指標，
+\item 透過折線圖或是相對解釋量來判斷的方法缺乏統一的判斷標準，
+\item 隨著統計應用的發展，許多研究已轉為追求預測能力，
+\end{itemize}
+}
+
+\subsection{研究目的}
+\frame{\frametitle{研究目的}
+\begin{itemize}
+\item 本研究建立一個適用於選擇精簡模型的$R^2$，並命名為懲罰$R^2$ (penalized-R-squared)，
+\item 資料模擬設計一系列顯著有關與無關的解釋變數。
+\item 實證資料分析使用北卡羅來納州 (North Carolina) 犯罪資料。
+\end{itemize}
+}
+
+
+\section{文獻回顧}
+\subsection{線性混合模型}
+\frame{\frametitle{線性混合模型}
+\begin{itemize}
+\item \citet{harville1977maximum}提出特定觀測值型式的LMM為
+\[Y_{ij}=\bm x_{ij}'\bm\beta+\bm z_{ij}'\bm b_i+e_{ij},\quad i=1, \ldots, m,\quad j=1, \ldots, n_i\]
+其中
+\begin{itemize}
+\item $Y_{ij}$為第$i$個個體之下第$j$個時間點的觀測值，
+\item $\bm x_{ij}$為維度 ($p\times1$) 的固定效果解釋變數，
+\item $\bm\beta$為固定效果 (fixed-effects) 參數向量，
+\item $\bm z_{ij}$為維度 ($q\times 1$) 的隨機效果 (random-effects) 解釋變數，
+\item $\bm b_i$為不可觀察到的隨機效果向量，
+\item $e_{ij}$為隨機誤差值。
+\end{itemize}
+\end{itemize}
+}
+
+\frame{
+\begin{itemize}
+\item 定義特定個體型式的混合模型為
+\[\bm Y_i=\bm X_i\bm\beta+\bm Z_i\bm b_i+\bm e_i\]
+其中
+\begin{itemize}
+\item $\bm Y_i=(Y_{i1},\ldots,Y_{in_i})'$、
+\item $\bm X_i=(\bm x_{i1}',\ldots,\bm x_{in_i}')$、$\ldots$。
+\end{itemize}
+\item 假設隨機係數$\bm b_i$服從$q$維常態分配，平均數為$0$且共變異數為$\bm G$，
+\item $\bm e_i$則服從$n_i$維常態分配，平均數為$0$且共變異數矩陣為$\bm R_i$，假設$\bm R_i$為$\sigma^2\bm I_{n_i}$。
+\end{itemize}
+}
+
+\frame{
+\begin{itemize}
+\item 給定$\bm X_i$與$\bm b_i$，則$\bm Y_i$的期望值與共變異數為
+\[\Exp(\bm Y_i|\bm X_i, \bm b_i)=\bm X_i\bm\beta+\bm Z_i\bm b_i\quad\text{且}\quad\cov(\bm Y_i|\bm X_i, \bm b_i)=\bm R_i\]
+\item 給定$\bm X_i$，$\bm Y_i$的期望值與共變異數為
+\[\Exp(\bm Y_i|\bm X_i)=\bm X_i\bm\beta\quad\text{且}\quad\cov(\bm Y_i|\bm X_i)=\bm Z_i\bm G\bm Z_i'+\bm R_i\]
+\end{itemize}
+}
+
+\frame{
+\begin{itemize}
+\item 時間相依共變量 (TDC) 為伴隨時間改變的解釋變數，
+\item 舉例：
+\begin{itemize}
+\item 某個體在追蹤期間內的身體指數發生改變，
+\item 且該個體平均與另一個體的平均身體指數也有差異。
+\end{itemize}
+\item 倘若這兩種效果並非一致，將導致誤導的描述或推論。
+\end{itemize}
+}
+
+\frame{\frametitle{TDC拆解後的線性混合模型}
+\begin{itemize}
+\item \citet{neuhaus1998between}提出TDC拆解的混合模型為
+\[Y_{ij}=\bar{\bm x}_{i.}'\bm\beta_B+\fib{\bm x_{ij}-\bar{\bm x}_{i.}}'\bm\beta_W+\fib{\bm z_{ij}-\bar{\bm z}_{i.}}'\bm b_i+e_{ij}\]
+其中
+\begin{itemize}
+\item $\bar{\bm x}_{i.}$為維度 ($p\times1$) 的個體間固定效果解釋變數，
+\item $\bm\beta_B$為個體間固定效果參數向量，
+\item $\fib{\bm x_{ij}-\bar{\bm x}_{i.}}$為維度 ($(p-1)\times1$) 的個體內固定效果解釋變數 (不包含截距項)，
+\item $\bm\beta_W$為個體內固定效果參數向量，
+\item $\fib{\bm z_{ij}-\bar{\bm z}_{i.}}$為維度($q\times 1$)的隨機效果解釋變數，
+\item $\bm b_i$為隨機效果向量。
+\end{itemize}
+\end{itemize}
+}
+
+
+\subsection{混合模型的R平方統計量}
+\frame{\frametitle{混合模型的$R^2$統計量}
+\begin{itemize}
+\item \citet{rights2019quantifying} 定義不同變異成分的$R^2$如下，
+\[\begin{array}{ccccc}
+R_{\beta_B}^2 &=& \cfrac{\bm\beta_B'\bm\Sigma_B\bm\beta_B}{\var(Y_{ij})} &=& \text{個體間固定效果占總變異的解釋比例；}\\
+R_{\beta_W}^2 &=& \cfrac{\bm\beta_W'\bm\Sigma_W\bm\beta_W}{\var(Y_{ij})} &=& \text{個體內固定效果占總變異的解釋比例；}\\
+R_{b_B}^2 &=& \cfrac{g_{00}}{\var(Y_{ij})} &=& \text{個體間隨機效果占總變異的解釋比例；}\\
+R_{b_W}^2 &=& \cfrac{tr(\bm G\bm\Sigma_Z)}{\var(Y_{ij})} &=& \text{個體內隨機效果占總變異的解釋比例，}
+\end{array}\]
+\item 其中$\bm\Sigma_B$、$\bm\Sigma_W$與$\bm\Sigma_Z$分別為$\bar{\bm x}_{i.}$、$\fib{\bm x_{ij}-\bar{\bm x}_{i.}}$與$\fib{\bm z_{ij}-\bar{\bm z}_{i.}}$的共變異數矩陣，$g_{00}$為斜率截距項變異數。
+\end{itemize}
+}
+
+\frame{
+\begin{itemize}
+\item 混合模型並沒有透過自由度修正的$R^2$，
+\item Rights認為直接代入相對應變異數成分的REML估計值。
+\item 混合模型的$R^2$依據最大值選出的模型仍舊有過度擬合的問題。
+\end{itemize}
+}
+
+
+\subsection{Akaike訊息準則}
+\frame{\frametitle{Akaike訊息準則}
+\begin{itemize}
+\item 令邊際共變數$\cov(\bm Y_i|\bm X_i)=\bm V$，假設觀測值彼此之間獨立，AIC定義為
+\[AIC =-2\text{ln}\fib{f(y|\hat{\bm \beta}, \hat{\bm V})}+2k\]
+\item \citet{hurvich1989regression} 提出AIC修正版本，定義如下
+\[AICc=AIC+\frac{2(k+1)(k+2)}{n-k-2}\]
+\end{itemize}
+}
+
+
+\frame{
+\begin{itemize}
+\item \citep{vaida2005conditional} 提出mAIC，定義如下
+\[mAIC=-2\text{ln}\fib{f(y|\hat{\bm \beta}, \hat{\bm V})}+2\alpha_n(p+q)\]
+\begin{itemize}
+\item 其中，$\alpha_n$等於$n/(n-p-q-1)$。
+\end{itemize}
+\item cAIC定義如下，
+\[cAIC=-2\text{ln}\fib{f(y|\hat{\bm \beta}, \hat{\bm V}, \hat{\bm b})}+2(\rho + 1)\]
+\begin{itemize}
+\item 其中，$\rho$為
+\[\rho=tr\fib{\begin{pmatrix}X'X&X'Z\\Z'X&Z'Z+G^{-1}\end{pmatrix}^{-1}
+\begin{pmatrix}X'X&X'Z\\Z'X&Z'Z\end{pmatrix}}\text{。}\]
+\end{itemize}
+\end{itemize}
+}
+
+\frame{
+\begin{itemize}
+\item 受限最大概似函數 (REML) 比起最大概似函數 (ML) 更能得到不偏估計量，
+\item REML卻會干擾四個AIC在選模的表現，在比較固定效果的變數時可能會得出錯誤的結果 \citep{greven2010behaviour}，
+\item 本研究提出一個含有懲罰機制且能夠辨別相對重要固定與隨機效果變數的$R^2$，來避開REML對選模造成的影響。
+\end{itemize}
+}
+
+\addtocontents{toc}{\newpage}
+
+
+\section{懲罰R平方}
+\subsection{定義與特性}
+\frame{\frametitle{定義}
+\begin{itemize}
+\item 懲罰$R^2$為
+\begin{equation*}\label{eq:pR2}
+R^2(\alpha) = (1-\alpha)R^2+ \alpha\fib{\frac{R^2}{r}} = \fib{1-\alpha+\alpha r^{-1}}R^2, \quad\alpha\in[0, 1] \text{，}
+\end{equation*}
+其中
+\begin{itemize}
+\item $R^2$可以為 ($R_{\beta_B}^2+R_{\beta_W}^2$)、$R_{b_W}^2$或是其他型式
+\item $r$為$R^2$對應之參數個數
+\item $\alpha$為可調控的懲罰係數，且$\alpha$介於0到1之間
+\end{itemize}
+\item $R^2(\alpha)$為兩種解釋量的加權平均
+\end{itemize}
+}
+
+\frame{\frametitle{懲罰係數與懲罰項}
+\begin{itemize}	
+\item $\alpha$調控$r^{-1}$的懲罰程度，
+\item $\fib{1-\alpha+\alpha r^{-1}}$具有調控性質的懲罰項。
+\end{itemize}
+	\begin{figure}[h]
+	\centering
+	\subfloat[不同參數之下$R^2(0.0)$的變動]{
+	\includegraphics[scale=0.5]{WritPlot311.png}}
+	\subfloat[不同參數之下$R^2(0.5)$的變動]{
+	\includegraphics[scale=0.5]{WritPlot312.png}}
+	\caption{演示在不同參數之下$R^2$與$R^2(0.5)$的變動}
+	\end{figure}
+}
+
+\frame{\frametitle{$\alpha$決定模型選擇的結果}
+\begin{itemize}	
+\item 當$\alpha$越接近$0$表示懲罰$R^2$選出的模型越複雜；
+\item 當$\alpha$越接近$1$表示懲罰$R^2$選出的模型越精簡。
+\end{itemize}
+	\begin{figure}[h]
+	\centering
+	\subfloat[不同參數之下$R^2(0.25)$的變動]{
+	\includegraphics[scale=0.5]{WritPlot313.png}}
+	\subfloat[不同參數之下$R^2(0.75)$的變動]{
+	\includegraphics[scale=0.5]{WritPlot314.png}}
+	\caption{演示在不同參數之下$R^2(0.25)$與$R^2(0.75)$的變動}
+	\end{figure}	
+}
+
+\frame{\frametitle{比較模型懲罰$R^2$的關鍵}
+\begin{itemize}	
+\item 比較模型一與模型二的$R^2(\alpha)$，
+\[\frac{\text{模型一的 }R^2(\alpha)}{\text{模型二的 }R^2(\alpha)}=\frac{\text{模型一的懲罰項}}{\text{模型二的懲罰項}}\times\frac{\text{模型一的 }R^2}{\text{模型二的 }R^2}\text{，}\]
+\item 當等式右邊計算結果大於$1$，模型一會被選為較佳模型，
+\item 選擇懲罰$R^2$的關鍵為候選模型$R^2$與懲罰項兩者的比值，而非差距，
+\end{itemize}
+}
+
+
+\subsection{懲罰R平方的使用方式}
+\frame{\frametitle{懲罰$R^2$的使用方式}
+\begin{itemize}	
+\item 自動選取法以逐步向後選取法 (backward elimination selection) 為例，
+\item 步驟可分為兩大階段：
+\begin{itemize}	
+\item 第一階段為透過懲罰$R_{b_W}^2$依序比較不同隨機效果變數以找出最佳隨機效果模型；
+\item 第二階段為透過懲罰 ($R_{\beta_B}^2+R_{\beta_W}^2$) 比較固定效果變數以找出最佳固定效果模型。
+\end{itemize}
+\end{itemize}
+}
+
+\frame{\frametitle{第一階段-比較隨機效果}
+\begin{itemize}	
+\item 放入所有固定與隨機效果解釋變數，
+\item 第一階段：透過懲罰$R_{b_W}^2$依序比較不同隨機效果變數。
+\[R_{b_W}^2(\alpha)=\fib{1-\alpha+\alpha\fib{\Sigma_{i=1}^q i}^{-1}}R_{b_W}^2\]
+\begin{itemize}	
+\item 無設定停止條件之下，會產生$q-1$個候選模型，
+\item 依序剔除隨機效果變數的順序可依據LRT的卡方統計量的排序。
+\end{itemize}
+\end{itemize}
+}
+
+\frame{\frametitle{第二階段-比較固定效果}
+\begin{itemize}	
+\item 模型隨機效果承接前個步驟的結果，
+\item 第二階段：透過懲罰 ($R_{\beta_B}^2+R_{\beta_W}^2$) 依序比較不同固定效果模型變數。
+\[R_{\beta_B+\beta_W}^2(\gamma)=\fib{1-\gamma+\gamma (2p-1)^{-1}}(R_{\beta_B}^2+R_{\beta_W}^2)\]
+\begin{itemize}	
+\item 無設定停止條件之下，會產生$2p-2$個候選模型，
+\item 依序剔除隨機效果變數的順序可依據偏F檢定 (Partial F test) 統計量的排序。
+\end{itemize}
+\item 隨機效果變數必須為固定效果變數的子集合。
+\end{itemize}
+}
+
+
+\subsection{懲罰係數$\alpha$的選擇}
+\frame{\frametitle{懲罰係數$\alpha$的選擇}
+\begin{itemize}	
+\item 兩種方式：
+\begin{itemize}	
+\item 第一種為網格搜索方式；
+\item 第二種為給定容忍值方式。
+\end{itemize}
+\item 兩種方式可同時使用，亦可獨立使用。
+\end{itemize}
+}
+
+\frame{\frametitle{網格搜索方式}
+\begin{itemize}	
+\item 步驟
+\begin{itemize}	
+\item 將$\alpha$的定義域切割為一個等差數列，令作$\{\alpha_k\}_{k=1}^n=\{\alpha_1,\alpha_2,\ldots, \alpha_n\}$；
+\item 對每個候選模型計算$R^2(\alpha_1)$、$R^2(\alpha_2)$到$R^2(\alpha_n)$；
+\item 找出上述懲罰$R^2$各自最大值所對應的模型中，出現最多次模型的參數個數$r_0$，
+\item 最佳範圍$\alpha_0$滿足
+\[\min\fib{\alpha_k\left|\;\mathop{\arg\max}\limits_{r}\ R^2(\alpha_k)=r_0\right.}\leq\alpha_0\leq\max\fib{\alpha_k\left|\;\mathop{\arg\max}\limits_{r}\ R^2(\alpha_k)=r_0\right.}\]
+\end{itemize}
+\item 若某些參數出現的次數相同，此時可將$\alpha_k$的公差設低一些再重新比較。
+\end{itemize}
+}
+
+\frame{
+	\begin{figure}[h]
+	\centering
+	\includegraphics[scale=0.6]{WritPlot331.png}
+	\caption{演示在不同$\alpha$之下$R^2(\alpha)$的變動}
+	\label{fig:simpR2walpha}
+	\end{figure}
+}
+
+\frame{\frametitle{給定容忍值方式}
+\begin{itemize}	
+\item 步驟
+\begin{itemize}	
+\item 令$R_{\max}^2$與$r_{\max}$為模型最大解釋量與對應的參數個數；
+\item 令$\Delta R^2$與$\Delta r$為容忍的解釋損失與對應減少的參數個數；
+\item 考慮納入損失容忍度的懲罰$R^2$被選為較佳模型的情形，
+\[\fib{1-\alpha+\alpha r_{\max}^{-1}}R_{\max}^2 \leq \fib{1-\alpha+\alpha (r_{\max}-\Delta r)^{-1}}(R_{\max}^2-\Delta R^2)\]
+\item $\alpha$不等式的根為
+\[\alpha_0\geq\Delta R^2\fib{\Delta R^2-\frac{R_{\max}^2}{r_{\max}}+\frac{R_{\max}^2-\Delta R^2}{r_{\max}-\Delta r}}^{-1}\]
+\end{itemize}
+\end{itemize}
+}
+
+\frame{
+\begin{itemize}	
+\item $\alpha_0$必須介於0到1之間，
+\item 若不等式的右式為大於1的數，說明$\alpha$給定0到1之間皆不滿足；
+\item 若為小於0的數，則說明$\alpha$給定0到1之間皆滿足，
+\end{itemize}
+}
+
+\section{資料模擬與實證分析}
+\subsection{模擬參數與模型種類設定}
+\frame{\frametitle{模擬參數}
+\begin{itemize}	
+\item 設定個體數$m$為200、觀測時間次數$n_i$為10，
+\item 生成19個解釋變數，包含13個個體間與6個個體內，
+\item $\bm\beta_B=(-4, 5, -1, 1, -1,0,0,0,0,0,0,0,0,0)'\text{\quad 與\quad}\bm\beta_W=(7,-6,0,0,0,0)'\text{，}$
+\item $\bm b_i$來自平均數為0且共變異數為$\bm G$的多維常態分配，
+\[\bm G=
+\begingroup\renewcommand*{\arraystretch}{0.7}\begin{pmatrix}
+30&10&0&0&0&0&0\\
+10&25&0&0&0&0&0\\
+0&0&15&0&0&0&0\\
+0&0&0&1&0&0&0\\
+0&0&0&0&1&0&0\\
+0&0&0&0&0&0&0\\
+0&0&0&0&0&0&0\\
+\end{pmatrix}\endgroup\]
+\item 誤差$e_{ij}$來自平均數為0、變異數為$10$的常態分配。
+\end{itemize}
+}
+
+\frame{\frametitle{模型種類設定}
+\begin{itemize}	
+\item 完整模型可表示為
+\begin{multline*}
+Y_{ij} = \beta_{0B}+\bar x_{i.1}'\beta_{1B}+\bar x_{i.2}'\beta_{2B}+\bar x_{i.3}'\beta_{3B}+\bar x_{i.4}'\beta_{4B}\\
++\fib{x_{ij1}-\bar x_{i.1}}'\beta_{1W}+\fib{x_{ij2}-\bar x_{i.2}}'\beta_{2W}+b_{i0}+\fib{x_{ij1}-\bar x_{i.1}}'b_{i1}\\
++\fib{x_{ij2}-\bar x_{i.2}}'b_{i2}+\fib{x_{ij3}-\bar x_{i.3}}'b_{i3}+\fib{x_{ij4}-\bar x_{i.4}}'b_{i4}+e_{ij}\text{；}
+\end{multline*}
+\item 精簡模型為完整模型剔除部分解釋力較低的變數，
+\item 超飽和模型為完整模型之下加上部分不顯著變數，
+\item 過度精簡模型則為精簡模型下剔除部分解釋變數，
+\item 剩餘種類的模型則皆歸類為其他模型。
+\end{itemize}
+}
+
+
+\subsection{模擬結果}
+\frame{\frametitle{模擬結果}
+\begin{itemize}	
+\item 我們考慮三種LMM選模情形：
+\begin{itemize}	
+\item 第一種情形為「已知固定效果之下選擇隨機效果模型」；
+\item 第二種情形為「已知隨機效果之下選擇固定效果變數」；
+\item 第三種情形為「隨機與固定效果皆未知之下」。
+\end{itemize}
+\end{itemize}
+}
+
+\frame{\frametitle{已知固定效果之下選擇隨機效果模型}
+\begin{itemize}	
+\item 僅有$\fib{x_{ij1}-\bar x_{i.1}}$與$\fib{x_{ij2}-\bar x_{i.2}}$是解釋力較高的變數。
+\end{itemize}
+    \begin{figure}[h]
+	\centering
+	\includegraphics[scale=0.6]{WritPlot411.png}
+	\caption{已知固定效果之下不同隨機效果的參數個數對$R_{b_W}^2$的變動}
+	\label{fig:type1R2change}
+	\end{figure}
+}
+
+\frame{\frametitle{已知固定效果之下選擇隨機效果模型}
+\begin{table}[H]
+\centering
+\caption{懲罰$R_{b_W}^2$選出的隨機效果最佳模型在五種模型的比率}
+\label{tab:type1rateR}
+\resizebox{0.7\textwidth}{!}{
+\begin{tabular}{lccccc}
+\toprule 
+& \multicolumn{5}{c}{隨機效果}\\
+\cmidrule{2-6}
+$R_{b_W}^2(\alpha)$ & 過度精簡模型\tnote{b}  & 精簡模型\tnote{a}   & 完整模型   & 超飽和模型\tnote{c}   & 其他模型 \\
+\midrule
+$\alpha = 0.0$   & 0.000 & 0.000 & 0.090 & 0.910 & 0.000 \\
+$\alpha = 0.1$   & 0.000 & 0.000 & 0.335 & 0.665 & 0.000 \\
+$\alpha = 0.2$   & 0.000 & 0.012 & 0.615 & 0.373 & 0.000 \\
+$\alpha = 0.3$   & 0.000 & 0.181 & 0.697 & 0.122 & 0.000 \\
+$\alpha = 0.4$   & 0.000 & 0.706 & 0.282 & 0.012 & 0.000 \\
+$\alpha = 0.5$   & 0.000 & 0.984 & 0.016 & 0.000 & 0.000 \\
+$\alpha = 0.6$   & 0.000 & 0.999 & 0.001 & 0.000 & 0.000 \\
+$\alpha = 0.7$   & 0.000 & 1.000 & 0.000 & 0.000 & 0.000 \\
+$\alpha = 0.8$   & 0.000 & 1.000 & 0.000 & 0.000 & 0.000 \\
+$\alpha = 0.9$   & 0.140 & 0.860 & 0.000 & 0.000 & 0.000 \\
+$\alpha = 1.0$   & 0.954 & 0.046 & 0.000 & 0.000 & 0.000 \\
+\bottomrule
+\end{tabular}}
+\end{table}
+}
+
+\frame{\frametitle{已知固定效果之下選擇隨機效果模型}
+\begin{itemize}	
+\item 大多數的$\alpha_0$介於0.4到0.9之間，且其範圍長度和上下位置並未變動太大。
+\end{itemize}
+    \begin{figure}[h]
+	\centering
+	\includegraphics[scale=0.6]{WritPlot4112.png}
+	\caption{透過網格搜索方式找出懲罰$R_{b_W}^2$的$\alpha_0$}
+	\label{fig:type1alpha0}
+	\end{figure}
+}
+
+\frame{\frametitle{已知固定效果之下選擇隨機效果模型}
+\begin{table}[H]
+\centering
+\caption{$R_{b_W}^2(\alpha_0)$與AIC統計量選出的隨機效果最佳模型在五種模型的比率}
+\label{tab:type1rateR}
+\resizebox{0.7\textwidth}{!}{
+\begin{tabular}{lrrrrr}
+\toprule
+& \multicolumn{5}{c}{隨機效果}\\
+\cmidrule{2-6}
+      & 過度精簡模型    & 精簡模型     & 完整模型     & 超飽和模型     & 其他模型 \\
+\midrule
+$R_{b_W}^2(\alpha_0)$ & 0.000 & 0.988 & 0.010 & 0.002 & 0.000 \\
+AIC   & 0.000 & 0.015 & 0.947 & 0.038 & 0.000 \\
+AICc  & 0.000 & 0.016 & 0.947 & 0.037 & 0.000 \\
+cAIC  & 0.000 & 0.003 & 0.621 & 0.376 & 0.000 \\
+\bottomrule
+\end{tabular}}
+\end{table}
+}
+
+
+\subsection{實證分析}
+\frame{\frametitle{實證分析}
+\begin{itemize}	
+\item 實證分析
+\end{itemize}
+}
+
+
+\section{結論}
+\frame{\frametitle{結論}
+\begin{itemize}	
+\item 結論
+\end{itemize}
+}
+
+
+
+%	\begin{figure}[h]
+%	\centering
+%	\includegraphics[width=\textwidth]{Meetin0102.png}
+%	\end{figure}
+
+
+
+\section*{參考書目}
+\frame[t, allowframebreaks]{\frametitle{參考書目}
+\bibliographystyle{apa}
+\bibliography{Reference}
+}
+
+
+\end{document}
+
